@@ -1,0 +1,30 @@
+# Requisitos para la Aplicación ECDSA
+# 
+# Esta aplicación solo usa librerías estándar de Python
+# No se requieren instalaciones adicionales con pip
+#
+# Librerías utilizadas (todas estándar):
+# - tkinter (interfaz gráfica, incluida en Python)
+# - hashlib (funciones hash criptográficas)
+# - secrets (generación de números aleatorios seguros)
+# - math (operaciones matemáticas)
+# - typing (type hints)
+#
+# Requisitos del sistema:
+# - Python 3.7 o superior
+# - Sistema operativo: Windows, Linux o macOS
+# - Tkinter (generalmente incluido con Python)
+#
+# Para verificar que Python está correctamente instalado:
+#   python --version
+#
+# Para verificar que Tkinter está disponible:
+#   python -m tkinter
+#
+# Si Tkinter no está instalado (raro):
+#   - Ubuntu/Debian: sudo apt-get install python3-tk
+#   - Fedora: sudo dnf install python3-tkinter
+#   - macOS: Tkinter viene incluido con Python
+#   - Windows: Tkinter viene incluido con Python
+
+# No hay dependencias externas - ¡Todo listo para ejecutar!

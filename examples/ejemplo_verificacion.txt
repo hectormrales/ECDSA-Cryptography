@@ -1,0 +1,235 @@
+# Ejemplo de Verificación ECDSA - Paso a Paso
+
+Este ejemplo reproduce exactamente la verificación mostrada en las imágenes adjuntas.
+
+## Datos del Ejemplo
+
+### Curva Elíptica
+**Ecuación:** y² = x³ + x + 10 (mod 11)
+
+**Parámetros:**
+- p = 11 (primo del campo finito)
+- a = 1
+- b = 10
+- Generador G = (6, 1)
+- Orden q = 10
+
+### Llaves y Firma
+- **Llave pública:** Q = (9, 0)
+- **Hash del mensaje:** H(M) = 9
+- **Firma:** (r, s) = (4, 3)
+
+---
+
+## Proceso de Verificación
+
+### Paso 0 - Verificar rango de r y s
+
+Verificamos que: **1 ≤ r, s ≤ q-1**
+
+- r = 4
+- s = 3
+- q - 1 = 9
+
+Comprobación:
+- 1 ≤ 4 ≤ 9 ✓
+- 1 ≤ 3 ≤ 9 ✓
+
+✓ Aquí cumplen, así que procedemos.
+
+---
+
+### Paso 1 - Calcular w = s⁻¹ mod q
+
+Necesitamos el **inverso modular** de s = 3 módulo q = 10
+
+Buscamos un número w tal que: **s × w ≡ 1 (mod q)**
+
+Usando el algoritmo extendido de Euclides:
+
+3 × 7 = 21 ≡ 1 (mod 10)
+
+Por lo tanto: **w = 7**
+
+Verificación: 3 × 7 = 21 = 2×10 + 1 ≡ 1 (mod 10) ✓
+
+---
+
+### Paso 2 - Calcular u₁ y u₂
+
+**u₁ = H(M) × w mod q**
+u₁ = 9 × 7 mod 10
+u₁ = 63 mod 10
+**u₁ = 3**
+
+**u₂ = r × w mod q**
+u₂ = 4 × 7 mod 10
+u₂ = 28 mod 10
+**u₂ = 8**
+
+---
+
+### Paso 3 - Calcular el punto X = u₁·G + u₂·Q en la curva
+
+Hacemos multiplicaciones escalares y suma de puntos en la curva:
+**y² = x³ + x + 10 (mod 11)**
+
+#### Calcular u₁·G = 3·G
+
+Necesitamos calcular 3G = G + G + G
+
+**1G = G = (6, 1)** (dado)
+
+**2G = G + G:**
+- Usar fórmula de duplicación de punto
+- λ = (3x₁² + a) / (2y₁) mod p
+- λ = (3×6² + 1) / (2×1) mod 11
+- λ = (108 + 1) / 2 mod 11
+- λ = 109 / 2 mod 11
+- λ = 10 / 2 mod 11  (porque 109 mod 11 = 10)
+- λ = 5
+
+- x₃ = λ² - 2x₁ mod p
+- x₃ = 5² - 2×6 mod 11
+- x₃ = 25 - 12 mod 11
+- x₃ = 13 mod 11 = 2
+
+- y₃ = λ(x₁ - x₃) - y₁ mod p
+- y₃ = 5(6 - 2) - 1 mod 11
+- y₃ = 5×4 - 1 mod 11
+- y₃ = 19 mod 11 = 8
+
+**2G = (2, 8)**
+
+**3G = 2G + G = (2, 8) + (6, 1):**
+- Usar fórmula de suma de puntos
+- λ = (y₂ - y₁) / (x₂ - x₁) mod p
+- λ = (1 - 8) / (6 - 2) mod 11
+- λ = -7 / 4 mod 11
+- λ = 4 / 4 mod 11  (porque -7 mod 11 = 4)
+- λ = 1
+
+- x₃ = λ² - x₁ - x₂ mod p
+- x₃ = 1² - 2 - 6 mod 11
+- x₃ = 1 - 8 mod 11
+- x₃ = -7 mod 11 = 4
+
+- y₃ = λ(x₁ - x₃) - y₁ mod p
+- y₃ = 1(2 - 4) - 8 mod 11
+- y₃ = -2 - 8 mod 11
+- y₃ = -10 mod 11 = 1
+
+**u₁·G = 3G = (4, 1)** ✓
+
+(Se puede comprobar que 1G = (6,1), 2G = (2,8), 3G = (4,1))
+
+#### Observación sobre Q = (9, 0)
+
+La llave pública Q = (9, 0) tiene coordenada y = 0, lo que implica que es un **punto de orden 2**.
+
+Verificación en la curva:
+- y² = 0² = 0
+- x³ + x + 10 = 9³ + 9 + 10 = 729 + 9 + 10 = 748 ≡ 0 (mod 11) ✓
+
+Esto significa que **2Q = O** (el punto en el infinito).
+
+Por tanto:
+- 8Q = (8 mod 2)Q = 0·Q = **O** (punto en el infinito)
+
+#### Calcular X = u₁·G + u₂·Q
+
+X = 3G + 8Q
+X = (4, 1) + O
+X = **(4, 1)**
+
+Porque sumar cualquier punto con O da el mismo punto: P + O = P
+
+---
+
+### Paso 4 - Comprobar la igualdad de x_X mod q con r
+
+La coordenada x de X es: **x_X = 4**
+
+Calculamos: **x_X mod q = 4 mod 10 = 4**
+
+Esto **coincide** con **r = 4** ✓
+
+---
+
+## Conclusión sobre la Firma
+
+Como x_X ≡ r (mod q), la verificación es exitosa.
+
+**✓ La firma (r=4, s=3) es VÁLIDA**
+
+Esto confirma que:
+1. El mensaje con hash H(M) = 9 fue firmado correctamente
+2. La llave pública Q = (9, 0) corresponde a la llave privada usada
+3. La firma no ha sido alterada
+
+---
+
+## Cómo Reproducir en la Aplicación
+
+1. **Ejecutar la aplicación:**
+   ```bash
+   python src/gui.py
+   ```
+
+2. **Configurar la curva (si no está ya configurada):**
+   - Ir a pestaña "Configurar Curva"
+   - Clic en "Cargar Curva de Ejemplo (p=11)"
+   - Clic en "Aplicar Curva"
+
+3. **Importar la llave pública de ejemplo:**
+   - Ir a pestaña "Gestión de Llaves"
+   - Seleccionar usuario (ej: Betito)
+   - Clic en "Importar Llave Pública"
+   - Seleccionar archivo `examples/llaves_ejemplo/llave_publica_ejemplo.txt`
+
+4. **Verificar la firma:**
+   - Ir a pestaña "Verificar Firma"
+   - Ingesar un mensaje cualquiera (ej: "Mensaje de prueba")
+   - Marcar checkbox "Usar valor de hash manual H(M):"
+   - Ingresar: 9
+   - Ingresar firma: r = 4, s = 3
+   - Seleccionar el usuario con la llave importada
+   - Clic en "Verificar Firma (Paso a Paso)"
+
+5. **Ver el resultado detallado:**
+   - La aplicación mostrará todos los pasos intermedios
+   - Resultado final: ✓ La firma es VÁLIDA
+
+---
+
+## Notas Adicionales
+
+### Punto de Orden 2
+
+Q = (9, 0) es especial porque:
+- 1Q = (9, 0)
+- 2Q = O (infinito)
+
+Los puntos con y = 0 siempre tienen orden 2 o son el punto en el infinito.
+
+### Cálculos Modulares
+
+Recuerda que en módulo 11:
+- -7 ≡ 4 (porque -7 + 11 = 4)
+- -10 ≡ 1 (porque -10 + 11 = 1)
+- 109 ≡ 10 (porque 109 = 9×11 + 10)
+
+### Inverso Modular
+
+Para encontrar 4⁻¹ mod 11:
+- Buscamos x tal que 4x ≡ 1 (mod 11)
+- Probando: 4×3 = 12 ≡ 1 (mod 11)
+- Por tanto: 4⁻¹ ≡ 3 (mod 11)
+
+O usando el algoritmo extendido de Euclides.
+
+---
+
+## Referencias
+
+Este ejemplo está basado en las imágenes adjuntas que muestran la verificación paso a paso de una firma ECDSA sobre la curva y² = x³ + x + 10 (mod 11).

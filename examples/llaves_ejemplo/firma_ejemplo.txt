@@ -1,0 +1,27 @@
+=== FIRMA DIGITAL ECDSA - EJEMPLO ===
+
+Usuario: Ejemplo (de las imágenes adjuntas)
+Mensaje: Mensaje de prueba
+
+Firma (r, s):
+  r = 4
+  s = 3
+
+Hash del mensaje: H(M) = 9
+
+---
+
+NOTA: Esta firma corresponde al ejemplo mostrado en las imágenes adjuntas.
+Para verificarla correctamente, debes:
+
+1. Usar la llave pública Q = (9, 0) del archivo "llave_publica_ejemplo.txt"
+2. Usar el valor de hash manual H(M) = 9
+3. La curva debe ser: y² = x³ + x + 10 (mod 11)
+
+Pasos de verificación:
+- Paso 1: w = s⁻¹ mod q = 3⁻¹ mod 10 = 7
+- Paso 2: u₁ = 9×7 mod 10 = 3, u₂ = 4×7 mod 10 = 8
+- Paso 3: X = 3G + 8Q = (4,1) + O = (4,1)
+- Paso 4: x_X mod q = 4 mod 10 = 4 = r ✓
+
+RESULTADO: ✓ La firma es VÁLIDA
