@@ -545,7 +545,17 @@ class AplicacionECDSA:
                     paso = pasos[key]
                     resultado += f"{paso['titulo']}\n"
                     resultado += "-" * 60 + "\n"
-                    resultado += f"{paso['explicacion']}\n\n"
+                    
+                    # Manejar diferentes formatos de explicación
+                    if 'explicacion' in paso:
+                        resultado += f"{paso['explicacion']}\n\n"
+                    elif key == 'paso_2':
+                        # paso_2 tiene u1_calculo y u2_calculo en vez de explicacion
+                        resultado += f"{paso['u1_calculo']}\n"
+                        resultado += f"{paso['u2_calculo']}\n\n"
+                    else:
+                        # Otros formatos si existen
+                        resultado += "\n"
             
             # Resultado final
             resultado += "=" * 60 + "\n"

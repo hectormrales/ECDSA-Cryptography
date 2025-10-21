@@ -1,0 +1,13 @@
+# Llave Pública ECDSA
+# Curva: y² = x³ + 1x + 10 (mod 11)
+# Generador G = (6, 1)
+# Orden q = 10
+
+p=11
+a=1
+b=10
+Gx=6
+Gy=1
+q=10
+Qx=4
+Qy=1

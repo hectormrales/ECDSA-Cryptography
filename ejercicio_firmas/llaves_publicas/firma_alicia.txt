@@ -1,0 +1,42 @@
+=== FIRMA DIGITAL ECDSA ===
+
+Usuario: Alicia
+Mensaje: Si acepto
+
+Canción de Alicia
+-----------------
+
+Verso 1:
+En el cielo brilla una estrella
+que ilumina mi camino
+con su luz tan bella
+
+Coro:
+Canta el viento su melodía
+mientras baila la alegría
+en este nuevo día
+
+Verso 2:
+Entre montañas y mares
+encuentro la paz
+en lugares especiales
+
+Puente:
+Y aunque el tiempo pase
+y las horas vuelen
+mi corazón no fallase
+en lo que las estrellas revelan
+
+Coro Final:
+Canta el viento su melodía
+mientras baila la alegría
+en este nuevo día
+lleno de armonía
+
+Att Alicia
+
+Firma (r, s):
+  r = 4
+  s = 3
+
+Hash del mensaje: H(M) = 1
