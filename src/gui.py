@@ -425,23 +425,12 @@ class AplicacionECDSA:
         try:
             ecdsa = ECDSA(info['curva'])
             r, s = ecdsa.firmar(mensaje, info['llave_privada'])
-            hash_msg = ecdsa.hash_mensaje(mensaje)
             
-            # Crear firma en formato legible
-            resultado = f"=== FIRMA DIGITAL ECDSA ===\n\n"
-            resultado += f"Usuario: {usuario}\n"
-            resultado += f"Mensaje: {mensaje}\n\n"
-            resultado += f"# Readable Format (Educational)\n"
-            resultado += f"Firma (r, s):\n"
-            resultado += f"  r = {r}\n"
-            resultado += f"  s = {s}\n\n"
-            resultado += f"Hash del mensaje: H(M) = {hash_msg}\n\n"
-            
-            # Agregar codificación Base64
+            # Formato simple: solo mensaje y firma en Base64
             firma_texto = f"r={r}\ns={s}"
             firma_base64 = base64.b64encode(firma_texto.encode('utf-8')).decode('utf-8')
-            resultado += f"# Base64 Encoding (Professional)\n"
-            resultado += f"{firma_base64}\n"
+            
+            resultado = f"{mensaje}\n{firma_base64}"
             
             self.texto_firma.delete(1.0, tk.END)
             self.texto_firma.insert(1.0, resultado)
@@ -479,16 +468,24 @@ class AplicacionECDSA:
                 with open(nombre_archivo, 'r', encoding='utf-8') as f:
                     contenido = f.read()
                 
-                # Buscar valores de r y s
-                for linea in contenido.split('\n'):
-                    if linea.strip().startswith('r ='):
-                        r = linea.split('=')[1].strip()
-                        self.entry_r.delete(0, tk.END)
-                        self.entry_r.insert(0, r)
-                    elif linea.strip().startswith('s ='):
-                        s = linea.split('=')[1].strip()
-                        self.entry_s.delete(0, tk.END)
-                        self.entry_s.insert(0, s)
+                lineas = contenido.strip().split('\n')
+                
+                # Formato nuevo: primera línea = mensaje, segunda línea = Base64
+                if len(lineas) >= 2:
+                    # Decodificar Base64 de la última línea
+                    firma_base64 = lineas[-1].strip()
+                    firma_decodificada = base64.b64decode(firma_base64).decode('utf-8')
+                    
+                    # Parsear r y s
+                    for linea in firma_decodificada.split('\n'):
+                        if linea.startswith('r='):
+                            r = linea.split('=')[1].strip()
+                            self.entry_r.delete(0, tk.END)
+                            self.entry_r.insert(0, r)
+                        elif linea.startswith('s='):
+                            s = linea.split('=')[1].strip()
+                            self.entry_s.delete(0, tk.END)
+                            self.entry_s.insert(0, s)
                 
                 messagebox.showinfo("Éxito", "Firma cargada desde archivo")
             except Exception as e:

@@ -438,10 +438,9 @@ def crear_curva_ejemplo_pequena() -> CurvaEliptica:
 def exportar_llave_publica(llave_publica: PuntoElliptico, curva: CurvaEliptica, 
                            nombre_archivo: str):
     """
-    Exporta una llave pública en formato PEM profesional con Base64.
-    Incluye tanto formato legible (educativo) como Base64 (profesional).
+    Exporta una llave pública en formato PEM con Base64 puro.
     """
-    # Datos en formato legible
+    # Datos en formato texto
     datos_texto = (
         f"p={curva.p}\n"
         f"a={curva.a}\n"
@@ -458,28 +457,13 @@ def exportar_llave_publica(llave_publica: PuntoElliptico, curva: CurvaEliptica,
     
     with open(nombre_archivo, 'w', encoding='utf-8') as f:
         f.write("-----BEGIN ECDSA PUBLIC KEY-----\n")
-        f.write(f"Format: ECDSA-Educational-v1\n")
-        f.write(f"Encoding: Hybrid (Plain + Base64)\n")
-        f.write(f"\n")
-        f.write(f"# Readable Format (Educational)\n")
-        f.write(f"p={curva.p}\n")
-        f.write(f"a={curva.a}\n")
-        f.write(f"b={curva.b}\n")
-        f.write(f"Gx={curva.G.x}\n")
-        f.write(f"Gy={curva.G.y}\n")
-        f.write(f"q={curva.q}\n")
-        f.write(f"Qx={llave_publica.x}\n")
-        f.write(f"Qy={llave_publica.y}\n")
-        f.write(f"\n")
-        f.write(f"# Base64 Encoding (Professional)\n")
         f.write(f"{datos_base64}\n")
         f.write("-----END ECDSA PUBLIC KEY-----\n")
 
 
 def importar_llave_publica(nombre_archivo: str) -> Tuple[PuntoElliptico, CurvaEliptica]:
     """
-    Importa una llave pública desde un archivo en formato PEM.
-    Compatible con formatos: antiguo (comentarios #), PEM simple, y PEM con Base64.
+    Importa una llave pública desde un archivo en formato PEM con Base64.
     
     Returns:
         (llave_publica, curva)
@@ -489,42 +473,25 @@ def importar_llave_publica(nombre_archivo: str) -> Tuple[PuntoElliptico, CurvaEl
     
     datos = {}
     
-    # Intentar decodificar Base64 si existe
-    if "# Base64 Encoding" in contenido or "Base64:" in contenido:
-        # Buscar la línea de Base64
-        lineas_contenido = contenido.split('\n')
-        for i, linea in enumerate(lineas_contenido):
-            linea = linea.strip()
-            # La línea Base64 debe venir después del header "# Base64 Encoding"
-            if i > 0 and '# Base64' in lineas_contenido[i-1]:
-                if linea and not linea.startswith('#') and not linea.startswith('-----'):
-                    try:
-                        # Decodificar Base64
-                        datos_decodificados = base64.b64decode(linea).decode('utf-8')
-                        # Parsear los datos decodificados
-                        for dato_linea in datos_decodificados.split('\n'):
-                            if '=' in dato_linea:
-                                clave, valor = dato_linea.split('=', 1)
-                                datos[clave] = int(valor)
-                        break
-                    except:
-                        pass
-    
-    # Si no hay Base64 o falló, leer formato plano
-    if not datos:
-        for linea in contenido.split('\n'):
-            linea = linea.strip()
-            # Ignorar líneas vacías, comentarios, headers y metadatos
-            if not linea or linea.startswith('#') or linea.startswith('-----') or linea.startswith('Format:') or linea.startswith('Encoding:'):
-                continue
-            if '=' in linea and ':' not in linea:
-                partes = linea.split('=', 1)  # Split solo en el primer =
-                if len(partes) == 2:
-                    clave, valor = partes
-                    try:
+    # Buscar y decodificar Base64
+    for linea in contenido.split('\n'):
+        linea = linea.strip()
+        # Saltar headers PEM
+        if linea.startswith('-----'):
+            continue
+        # Si es Base64 (línea larga sin =)
+        if linea and len(linea) > 20:
+            try:
+                # Decodificar Base64
+                datos_decodificados = base64.b64decode(linea).decode('utf-8')
+                # Parsear los datos decodificados
+                for dato_linea in datos_decodificados.split('\n'):
+                    if '=' in dato_linea:
+                        clave, valor = dato_linea.split('=', 1)
                         datos[clave] = int(valor)
-                    except:
-                        pass
+                break
+            except:
+                pass
     
     curva = CurvaEliptica(
         p=datos['p'],
@@ -541,10 +508,10 @@ def importar_llave_publica(nombre_archivo: str) -> Tuple[PuntoElliptico, CurvaEl
 
 def exportar_llave_privada(llave_privada: int, curva: CurvaEliptica, nombre_archivo: str):
     """
-    Exporta una llave privada en formato PEM profesional con Base64.
+    Exporta una llave privada en formato PEM con Base64 puro.
     ADVERTENCIA: Mantener este archivo seguro y privado.
     """
-    # Datos en formato legible
+    # Datos en formato texto
     datos_texto = (
         f"p={curva.p}\n"
         f"a={curva.a}\n"
@@ -560,28 +527,13 @@ def exportar_llave_privada(llave_privada: int, curva: CurvaEliptica, nombre_arch
     
     with open(nombre_archivo, 'w', encoding='utf-8') as f:
         f.write("-----BEGIN ECDSA PRIVATE KEY-----\n")
-        f.write(f"Format: ECDSA-Educational-v1\n")
-        f.write(f"Encoding: Hybrid (Plain + Base64)\n")
-        f.write(f"WARNING: Keep this file SECRET!\n")
-        f.write(f"\n")
-        f.write(f"# Readable Format (Educational)\n")
-        f.write(f"p={curva.p}\n")
-        f.write(f"a={curva.a}\n")
-        f.write(f"b={curva.b}\n")
-        f.write(f"Gx={curva.G.x}\n")
-        f.write(f"Gy={curva.G.y}\n")
-        f.write(f"q={curva.q}\n")
-        f.write(f"d={llave_privada}\n")
-        f.write(f"\n")
-        f.write(f"# Base64 Encoding (Professional)\n")
         f.write(f"{datos_base64}\n")
         f.write("-----END ECDSA PRIVATE KEY-----\n")
 
 
 def importar_llave_privada(nombre_archivo: str) -> Tuple[int, CurvaEliptica]:
     """
-    Importa una llave privada desde un archivo en formato PEM.
-    Compatible con formatos: antiguo (comentarios #), PEM simple, y PEM con Base64.
+    Importa una llave privada desde un archivo en formato PEM con Base64.
     
     Returns:
         (llave_privada, curva)
@@ -589,44 +541,24 @@ def importar_llave_privada(nombre_archivo: str) -> Tuple[int, CurvaEliptica]:
     with open(nombre_archivo, 'r', encoding='utf-8') as f:
         contenido = f.read()
     
+    # Extraer la línea de Base64 (entre los headers PEM)
+    lineas = contenido.split('\n')
+    datos_base64 = ""
+    for linea in lineas:
+        linea = linea.strip()
+        if linea and not linea.startswith('-----'):
+            datos_base64 = linea
+            break
+    
+    # Decodificar Base64
+    datos_decodificados = base64.b64decode(datos_base64).decode('utf-8')
+    
+    # Parsear los datos
     datos = {}
-    
-    # Intentar decodificar Base64 si existe
-    if "# Base64 Encoding" in contenido or "Base64:" in contenido:
-        # Buscar la línea de Base64
-        lineas_contenido = contenido.split('\n')
-        for i, linea in enumerate(lineas_contenido):
-            linea = linea.strip()
-            # La línea Base64 debe venir después del header "# Base64 Encoding"
-            if i > 0 and '# Base64' in lineas_contenido[i-1]:
-                if linea and not linea.startswith('#') and not linea.startswith('-----'):
-                    try:
-                        # Decodificar Base64
-                        datos_decodificados = base64.b64decode(linea).decode('utf-8')
-                        # Parsear los datos decodificados
-                        for dato_linea in datos_decodificados.split('\n'):
-                            if '=' in dato_linea:
-                                clave, valor = dato_linea.split('=', 1)
-                                datos[clave] = int(valor)
-                        break
-                    except:
-                        pass
-    
-    # Si no hay Base64 o falló, leer formato plano
-    if not datos:
-        for linea in contenido.split('\n'):
-            linea = linea.strip()
-            # Ignorar líneas vacías, comentarios, headers y metadatos
-            if not linea or linea.startswith('#') or linea.startswith('-----') or linea.startswith('Format:') or linea.startswith('Encoding:') or linea.startswith('WARNING:'):
-                continue
-            if '=' in linea and ':' not in linea:
-                partes = linea.split('=', 1)  # Split solo en el primer =
-                if len(partes) == 2:
-                    clave, valor = partes
-                    try:
-                        datos[clave] = int(valor)
-                    except:
-                        pass
+    for dato_linea in datos_decodificados.split('\n'):
+        if '=' in dato_linea:
+            clave, valor = dato_linea.split('=', 1)
+            datos[clave] = int(valor)
     
     curva = CurvaEliptica(
         p=datos['p'],

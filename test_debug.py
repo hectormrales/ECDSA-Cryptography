@@ -60,13 +60,11 @@ try:
     assert "BEGIN ECDSA PUBLIC KEY" in contenido, "Error: Falta header BEGIN"
     assert "END ECDSA PUBLIC KEY" in contenido, "Error: Falta header END"
     
-    # Verificar que tiene sección Base64
-    assert "Base64 Encoding" in contenido, "Error: Falta sección Base64"
+    # Verificar que NO tiene secciones híbridas (solo Base64 puro)
+    assert "Base64 Encoding" not in contenido, "Error: Formato híbrido encontrado, debería ser Base64 puro"
+    assert "Readable Format" not in contenido, "Error: Formato híbrido encontrado, debería ser Base64 puro"
     
-    # Verificar que tiene sección legible
-    assert "Readable Format" in contenido, "Error: Falta sección legible"
-    
-    print("✅ PASS - Archivo contiene formato híbrido")
+    print("✅ PASS - Archivo contiene formato Base64 puro")
     print("\nContenido del archivo:")
     print(contenido)
     
@@ -111,10 +109,12 @@ try:
     
     assert "BEGIN ECDSA PRIVATE KEY" in contenido, "Error: Falta header BEGIN"
     assert "END ECDSA PRIVATE KEY" in contenido, "Error: Falta header END"
-    assert "Base64 Encoding" in contenido, "Error: Falta sección Base64"
-    assert "WARNING" in contenido, "Error: Falta advertencia de seguridad"
     
-    print("✅ PASS - Formato correcto con advertencia")
+    # Verificar que NO tiene formato híbrido (solo Base64 puro)
+    assert "Base64 Encoding" not in contenido, "Error: Formato híbrido encontrado, debería ser Base64 puro"
+    assert "WARNING" not in contenido, "Error: Formato híbrido encontrado, debería ser Base64 puro"
+    
+    print("✅ PASS - Formato Base64 puro")
     
 except Exception as e:
     print(f"❌ FAIL - Error: {e}")
@@ -230,11 +230,11 @@ print("\n" + "="*60)
 print("📊 RESUMEN DE PRUEBAS")
 print("="*60)
 print("✅ Todos los tests completados")
-print("✅ Base64 implementado correctamente en:")
+print("✅ Base64 puro implementado correctamente en:")
 print("   - Llaves públicas (.pem)")
 print("   - Llaves privadas (.pem)")
 print("   - Firmas (.sig)")
-print("✅ Formato híbrido funcional (legible + Base64)")
+print("✅ Formato minimalista: solo PEM headers + Base64")
 print("✅ Compatibilidad verificada")
 print("\n🎉 PROYECTO LISTO PARA USAR")
 print("="*60)
