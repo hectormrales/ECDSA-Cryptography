@@ -9,6 +9,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, filedialog
 import sys
 import os
+import base64
 
 # Agregar el directorio actual al path para importar ecdsa_core
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -324,9 +325,9 @@ class AplicacionECDSA:
             return
         
         nombre_archivo = filedialog.asksaveasfilename(
-            defaultextension=".txt",
-            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
-            initialfile=f"llave_publica_{usuario}.txt"
+            defaultextension=".pem",
+            filetypes=[("Archivos PEM", "*.pem"), ("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
+            initialfile=f"llave_publica_{usuario}.pem"
         )
         
         if nombre_archivo:
@@ -355,9 +356,9 @@ class AplicacionECDSA:
             return
         
         nombre_archivo = filedialog.asksaveasfilename(
-            defaultextension=".txt",
-            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
-            initialfile=f"llave_privada_{usuario}.txt"
+            defaultextension=".pem",
+            filetypes=[("Archivos PEM", "*.pem"), ("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
+            initialfile=f"llave_privada_{usuario}.pem"
         )
         
         if nombre_archivo:
@@ -367,7 +368,7 @@ class AplicacionECDSA:
     def importar_publica(self):
         """Importa una llave pública"""
         nombre_archivo = filedialog.askopenfilename(
-            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")]
+            filetypes=[("Archivos PEM", "*.pem"), ("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")]
         )
         
         if nombre_archivo:
@@ -386,7 +387,7 @@ class AplicacionECDSA:
     def importar_privada(self):
         """Importa una llave privada"""
         nombre_archivo = filedialog.askopenfilename(
-            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")]
+            filetypes=[("Archivos PEM", "*.pem"), ("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")]
         )
         
         if nombre_archivo:
@@ -424,14 +425,23 @@ class AplicacionECDSA:
         try:
             ecdsa = ECDSA(info['curva'])
             r, s = ecdsa.firmar(mensaje, info['llave_privada'])
+            hash_msg = ecdsa.hash_mensaje(mensaje)
             
+            # Crear firma en formato legible
             resultado = f"=== FIRMA DIGITAL ECDSA ===\n\n"
             resultado += f"Usuario: {usuario}\n"
             resultado += f"Mensaje: {mensaje}\n\n"
+            resultado += f"# Readable Format (Educational)\n"
             resultado += f"Firma (r, s):\n"
             resultado += f"  r = {r}\n"
             resultado += f"  s = {s}\n\n"
-            resultado += f"Hash del mensaje: H(M) = {ecdsa.hash_mensaje(mensaje)}\n"
+            resultado += f"Hash del mensaje: H(M) = {hash_msg}\n\n"
+            
+            # Agregar codificación Base64
+            firma_texto = f"r={r}\ns={s}"
+            firma_base64 = base64.b64encode(firma_texto.encode('utf-8')).decode('utf-8')
+            resultado += f"# Base64 Encoding (Professional)\n"
+            resultado += f"{firma_base64}\n"
             
             self.texto_firma.delete(1.0, tk.END)
             self.texto_firma.insert(1.0, resultado)
@@ -448,9 +458,9 @@ class AplicacionECDSA:
             return
         
         nombre_archivo = filedialog.asksaveasfilename(
-            defaultextension=".txt",
-            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
-            initialfile="firma.txt"
+            defaultextension=".sig",
+            filetypes=[("Archivos de firma", "*.sig"), ("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
+            initialfile="firma.sig"
         )
         
         if nombre_archivo:
@@ -461,7 +471,7 @@ class AplicacionECDSA:
     def cargar_firma(self):
         """Carga una firma desde un archivo"""
         nombre_archivo = filedialog.askopenfilename(
-            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")]
+            filetypes=[("Archivos de firma", "*.sig"), ("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")]
         )
         
         if nombre_archivo:

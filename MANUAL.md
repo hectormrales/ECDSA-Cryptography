@@ -232,7 +232,7 @@ Esto es útil para casos educativos donde el hash ya está calculado.
 
 ### Curva de Ejemplo (p=11)
 
-La aplicación incluye una curva pequeña ideal para aprendizaje:
+La aplicación incluye una curva
 
 **Ecuación:** y² = x³ + x + 10 (mod 11)
 
